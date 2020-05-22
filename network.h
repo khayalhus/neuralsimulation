@@ -48,7 +48,7 @@ public:
 	}
 	void print() {
 		for (int i = 0; i < amount; i++) {
-			cout << "Layer " << i + 1 << ":" << endl;
+			cout << "Layer " << i << ":" << endl;
 			layers[i].print();
 		}
 	}

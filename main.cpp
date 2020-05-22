@@ -1,5 +1,6 @@
 #include "network.h" // includes Network and Layer classes, this file also includes neuron.h file
 // which in turn includes Neuron and its subclasses
+#include "matrix.h"
 
 #include <string>
 #include <fstream>
@@ -59,17 +60,33 @@ void read_and_parse(ifstream& infile) {
 
 	
 	for (int i = 1; i < layerAmount; i++) {
-		double z = 0.1;
-
-		for (int k = 0; k < neuronAmount[i - 1]; k++) {
-			z += network[0][i - 1][k].getA() * 0.1;
-		}
-		
+		Matrix* Z = new Matrix(neuronAmount[i], 1);
 		for (int j = 0; j < neuronAmount[i]; j++) {
-			network[0][i][j].setZ(z);
-			network[0][i][j].activate();
-			network[0][i][j].print();
+			Z->setData(j, 0, 0.0);
 		}
+		Matrix* W = new Matrix(neuronAmount[i], neuronAmount[i - 1]);
+		for (int j = 0; j < neuronAmount[i]; j++) {
+			for (int k = 0; k < neuronAmount[i - 1]; k++) {
+				W->setData(j, k, 0.1);
+			}
+		}
+		Matrix* A = new Matrix(neuronAmount[i - 1], 1);
+		for (int j = 0; j < neuronAmount[i - 1]; j++) {
+			A->setData(j, 0, network[0][i - 1][j].getA());
+		}
+		Matrix* B = new Matrix(neuronAmount[i], 1);
+		for (int j = 0; j < neuronAmount[i]; j++) {
+			B->setData(j, 0, 0.1);
+		}
+		Z->multiply(W, A);
+		Z->add(B);
+
+		for (int j = 0; j < neuronAmount[i]; j++) {
+			network[0][i][j].setZ(Z->getData(j, 0));
+			network[0][i][j].activate();
+		}
+
+		delete Z, W, A, B;
 	}
 	delete[] neuronAmount;
 	delete[] typeID;
@@ -80,6 +97,7 @@ void read_and_parse(ifstream& infile) {
 
 int main(int argc, char* argv[]) {
 	ifstream infile;
+	
 	try {
 		open_file(argc, argv, infile);
 	}
@@ -87,8 +105,7 @@ int main(int argc, char* argv[]) {
 		cout << result << endl;
 		exit(1);
 	}
-
-	// infile.open("input1.txt"); // this is for testing via VS
+	// infile.open("input1.txt");
 
 	try {
 		read_and_parse(infile);
