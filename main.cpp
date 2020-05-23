@@ -99,13 +99,14 @@ void read_and_parse(ifstream* infile) {
 		}
 		Z->multiply(W, A); // does the multiplication of WA and equalizes it to Z vector
 		Z->add(B); // adds B to this equalization Z += B
-
+		
 		for (int j = 0; j < neuronAmount[i]; j++) {
 			network[0][i][j].setZ(Z->getData(j, 0)); // sends the result vector Z back to the neurons in the network
 			network[0][i][j].activate(); // activates the neurons
 		}
 
-		delete Z, W, A, B; // deletes allocated memory for matrices since their purpose is over
+		delete Z, delete W, delete A, delete B;
+		// deletes allocated memory for matrices since their purpose is over
 	}
 	delete[] neuronAmount; // deletes the array that holds amount of neurons
 	delete[] typeID; // deletes the array that hold neuron types
@@ -117,24 +118,24 @@ void read_and_parse(ifstream* infile) {
 }
 
 int main(int argc, char* argv[]) {
-	ifstream * infile = new ifstream;
+	ifstream * infile = new ifstream; // dynamically allocate stream for reading
 	try {
 		open_file(argc, argv, infile); // opens the specified file
 	}
 	catch (const char* result) {
 		cout << result << endl; // throws an error if file can't be opened
-		delete infile;
-		exit(1);
+		delete infile; // delete dynamically allocated stream
+		exit(1); // exit with error
 	}
-	//infile->open("input1.txt");
+
 	try {
 		read_and_parse(infile); // reads from and closes file, parses info
 	}
 	catch (const char* result) {
 		cout << result << endl; // throws an error if there is a problem with the input
-		delete infile;
-		exit(1);
+		delete infile; // delete dynamically allocated stream
+		exit(1); // exit with error
 	}
-	delete infile;
+	delete infile; // delete dynamically allocated stream
 	exit(0); // exits successfully
 }
