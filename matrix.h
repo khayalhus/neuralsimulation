@@ -11,6 +11,13 @@ public:
 			this->data[i] = new double[colCount]; // create columns of the matrix
 		}
 	}
+	~Matrix()
+	{
+		for (int i = 0; i < rowCount; i++) {
+			delete[] this->data[i]; // free each sub-array
+		}
+		delete[] this->data; // free the array that holds rows
+	}
 	void setData(int rowNum, int colNum, double data) {
 		this->data[rowNum][colNum] = data; // sets the data to the element at the given row and column
 	}
@@ -23,7 +30,8 @@ public:
 		for (int i = 0; i < rowCount; i++) {
 			for (int j = 0; j < colCount; j++) {
 				for (int k = 0; k < first->getColCount(); k++) {
-					this->data[i][j] += first->getData(i, k) * second->getData(k, j); // matrix multiplication
+					this->data[i][j] += first->getData(i, k) * second->getData(k, j);
+					// multiplies corresponding elements
 				}
 			}
 		}
@@ -32,7 +40,7 @@ public:
 		// this function adds the second matrix to this matrix
 		for (int i = 0; i < rowCount; i++) {
 			for (int j = 0; j < colCount; j++) {
-				this->data[i][j] += second->getData(i, j);
+				this->data[i][j] += second->getData(i, j); // adds corresponding elements
 			}
 		}
 	}
