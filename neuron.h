@@ -13,6 +13,9 @@ public:
 		this->z = z; // sets activated value
 		this->a = a; // sets value
 	}
+	virtual ~Neuron() {
+		// this fixes undefined behaviour when a derived class object pointed by base class is deleted
+	}
 	virtual void activate() = 0; // pure virtual method
 	double getZ() const {
 		return this->z; // gets activated value
@@ -34,6 +37,7 @@ public:
 class SigmoidNeuron : public Neuron {
 public:
 	SigmoidNeuron() :Neuron(0.0, 0.0){} // sets a default value
+	~SigmoidNeuron() {} // destructor
 	void activate() {
 		// This method will apply sigmoid formula to its value(z) and assign it to its activated value(a).
 		this->a = 1 / (1 + exp(-(this->z)));
@@ -44,6 +48,7 @@ public:
 class ReluNeuron : public Neuron {
 public:
 	ReluNeuron() :Neuron(0.0, 0.0) {} // sets a default value
+	~ReluNeuron() {} // destructor
 	void activate() {
 		// This method will apply relu formula to its value(z) and assign it to its activated value(a).
 		this->a = max(0.0, this->z);
@@ -54,6 +59,7 @@ public:
 class LReluNeuron : public Neuron {
 public:
 	LReluNeuron() :Neuron(0.0, 0.0) {} // sets a default value
+	~LReluNeuron() {} // destructor
 	void activate() {
 		// This method will apply leaky relu formula to its value(z) and assign it to its activated value(a).
 		this->a = max(0.1 * this->z, this->z);

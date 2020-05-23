@@ -5,22 +5,22 @@
 #include <string>
 #include <fstream>
 
-void open_file(int argc, char* argv[], ifstream& infile) {
+void open_file(int argc, char* argv[], ifstream* infile) {
 	if (argc != 2) throw "Not enough or too much arguments";
 	// throws error if input file is not properly given
-	infile.open(argv[1]); // opens the specified file
+	infile->open(argv[1]); // opens the specified file
 }
 
-void read_and_parse(ifstream& infile) {
+void read_and_parse(ifstream* infile) {
 	int layerAmount; // holds amount of layers in a network
-	infile >> layerAmount; // gets layer amount from input file
+	*infile >> layerAmount; // gets layer amount from input file
 	int * neuronAmount = new int[layerAmount]; // stores amount of neurons at each layer
 	for (int i = 0; i < layerAmount; i++) {
-		infile >> neuronAmount[i]; // gets amount of neurons for each layer from input file
+		*infile >> neuronAmount[i]; // gets amount of neurons for each layer from input file
 	}
 	int * typeID = new int[layerAmount]; // stores the type of neuron for each layer
 	for (int i = 0; i < layerAmount; i++) {
-		infile >> typeID[i]; // gets the type of neuron for each layer
+		*infile >> typeID[i]; // gets the type of neuron for each layer
 	}
 
 	Neuron* neurons; // holds neurons for a layer
@@ -38,6 +38,10 @@ void read_and_parse(ifstream& infile) {
 			neurons = new ReluNeuron[neuronAmount[i]]; // create ReLU neuron objects
 			break;
 		default:
+			delete[] neuronAmount;
+			delete[] typeID;
+			delete[] layers;
+			infile->close();
 			throw "Unidentified activation function!";
 			// throws error if undefined neuron type is requested
 			break;
@@ -50,15 +54,27 @@ void read_and_parse(ifstream& infile) {
 	// take values from the input file and assign it to the neurons of the first layer
 	int inputX; // holds the input values
 	int counter = 0;
-	while (infile >> inputX) { // reads input values
-		if (counter >= neuronAmount[0]) throw "Input shape does not match!"; // too many input
+	while (*infile >> inputX) { // reads input values
+		if (counter >= neuronAmount[0]) {
+			delete[] neuronAmount; // deletes the array that holds amount of neurons
+			delete[] typeID; // deletes the array that hold neuron types
+			delete network; // deletes network object
+			infile->close();
+			throw "Input shape does not match!"; // too many input
+		}
 		network[0][0][counter].setA(inputX); // sets A as input value
 		network[0][0][counter].setZ(inputX); // sets Z as input value, this is only for first layer. (layer 0)
 		counter++; // increment counter for next input
 	}
-	if (counter != neuronAmount[0]) throw "Input shape does not match!"; // too less of an input
+	if (counter != neuronAmount[0]) {
+		delete[] neuronAmount; // deletes the array that holds amount of neurons
+		delete[] typeID; // deletes the array that hold neuron types
+		delete network; // deletes network object
+		infile->close();
+		throw "Input shape does not match!"; // too less of an input
+	}
 
-	infile.close(); // close after getting all the data
+	infile->close(); // close after getting all the data
 	
 	for (int i = 1; i < layerAmount; i++) {
 		// create matrix objects for the equation: Z = W * A + B
@@ -101,21 +117,24 @@ void read_and_parse(ifstream& infile) {
 }
 
 int main(int argc, char* argv[]) {
-	ifstream infile;
+	ifstream * infile = new ifstream;
 	try {
 		open_file(argc, argv, infile); // opens the specified file
 	}
 	catch (const char* result) {
 		cout << result << endl; // throws an error if file can't be opened
+		delete infile;
 		exit(1);
 	}
-	//infile.open("input1.txt");
+	//infile->open("input1.txt");
 	try {
 		read_and_parse(infile); // reads from and closes file, parses info
 	}
 	catch (const char* result) {
 		cout << result << endl; // throws an error if there is a problem with the input
+		delete infile;
 		exit(1);
 	}
+	delete infile;
 	exit(0); // exits successfully
 }
